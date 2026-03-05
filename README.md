@@ -39,3 +39,7 @@ This repository is the source of truth for all my GitHub repositories.
 ## Local Copy
 
 These files are also maintained in `~/.kiro/` for Kiro AI assistant to use globally.
+
+## Test Update
+
+Testing auto-sync functionality - this line will trigger the workflow.
