@@ -1,0 +1,85 @@
+name: Sync Standards to All Repos
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'copilot-instructions.md'
+      - 'kiro-documentation-standards.md'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    name: Sync standards to all repositories
+    
+    steps:
+      - name: Checkout standards repo
+        uses: actions/checkout@v4
+      
+      - name: Sync to each repository
+        env:
+          GH_TOKEN: ${{ secrets.STANDARDS_SYNC_TOKEN }}
+        run: |
+          # Get all non-archived, non-fork repos
+          REPOS=$(gh repo list ${{ github.repository_owner }} --limit 1000 --json name,isArchived,isFork --jq '.[] | select(.isArchived == false and .isFork == false) | .name')
+          
+          for REPO in $REPOS; do
+            # Skip the standards repo itself
+            if [ "$REPO" = "github-standards" ]; then
+              continue
+            fi
+            
+            echo "Syncing to $REPO..."
+            
+            # Clone repo
+            gh repo clone "${{ github.repository_owner }}/$REPO" "$REPO" -- --depth 1 || continue
+            cd "$REPO"
+            
+            # Get default branch
+            DEFAULT_BRANCH=$(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed 's@^refs/remotes/origin/@@' || echo "main")
+            
+            # Create branch
+            BRANCH_NAME="sync-standards-$(date +%Y%m%d-%H%M%S)"
+            git checkout -b "$BRANCH_NAME"
+            
+            # Create .github if needed
+            mkdir -p .github
+            
+            # Copy files
+            cp ../copilot-instructions.md .github/
+            cp ../kiro-documentation-standards.md .github/
+            
+            # Commit
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add .github/
+            
+            if git commit -m "[skip ci] chore: sync standards from central repo" -m "Auto-synced from github-standards repository"; then
+              # Push
+              git push origin "$BRANCH_NAME"
+              
+              # Create PR
+              gh pr create \
+                --title "Update Copilot instructions and documentation standards" \
+                --body "This PR updates the standards from the central [github-standards](https://github.com/${{ github.repository_owner }}/github-standards) repository.
+
+## What Changed
+
+Check the diff to see what changed in:
+- \`.github/copilot-instructions.md\`
+- \`.github/kiro-documentation-standards.md\`
+
+## Auto-Sync
+
+This PR was automatically created by the standards sync workflow. Review and merge to apply the updates." \
+                --base "$DEFAULT_BRANCH" \
+                --head "$BRANCH_NAME" || echo "PR creation failed for $REPO"
+            else
+              echo "No changes for $REPO"
+            fi
+            
+            cd ..
+            rm -rf "$REPO"
+          done
