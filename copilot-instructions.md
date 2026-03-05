@@ -1,6 +1,6 @@
 # Copilot Agent Instructions
 
-**Version**: 1.0.2
+**Version**: 1.0.3
 
 ## Working in Existing PRs
 
