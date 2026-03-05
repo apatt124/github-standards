@@ -25,6 +25,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.STANDARDS_SYNC_TOKEN }}
         run: |
+          # Configure git to use the token for authentication
+          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
+          
           # Get all non-archived, non-fork repos
           REPOS=$(gh repo list ${{ github.repository_owner }} --limit 1000 --json name,isArchived,isFork --jq '.[] | select(.isArchived == false and .isFork == false) | .name')
           
