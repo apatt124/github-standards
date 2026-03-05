@@ -66,17 +66,17 @@ jobs:
               # Create PR
               gh pr create \
                 --title "Update Copilot instructions and documentation standards" \
-                --body "This PR updates the standards from the central [github-standards](https://github.com/${{ github.repository_owner }}/github-standards) repository.
+                --body "This PR updates the standards from the central github-standards repository.
 
-## What Changed
+          ## What Changed
 
-Check the diff to see what changed in:
-- \`.github/copilot-instructions.md\`
-- \`.github/kiro-documentation-standards.md\`
+          Check the diff to see what changed in:
+          - .github/copilot-instructions.md
+          - .github/kiro-documentation-standards.md
 
-## Auto-Sync
+          ## Auto-Sync
 
-This PR was automatically created by the standards sync workflow. Review and merge to apply the updates." \
+          This PR was automatically created by the standards sync workflow. Review and merge to apply the updates." \
                 --base "$DEFAULT_BRANCH" \
                 --head "$BRANCH_NAME" || echo "PR creation failed for $REPO"
             else
