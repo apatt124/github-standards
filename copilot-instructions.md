@@ -1,5 +1,7 @@
 # Copilot Agent Instructions
 
+**Version**: 1.0.1
+
 ## Working in Existing PRs
 
 **CRITICAL RULE**: When you receive a comment or request on an existing PR, **ALL work must be done in that same PR**. Do NOT open a new PR off an existing PR.
