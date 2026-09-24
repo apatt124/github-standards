@@ -1,45 +1,72 @@
 # GitHub Standards
 
-This repository contains centralized GitHub Copilot instructions and documentation standards that are automatically synced to all my repositories.
+This repository is the **source of truth** for all shared Kiro steering docs and GitHub standards across BridgeFirst repos.
 
-## Files
+## Contents
 
-- `copilot-instructions.md` - GitHub Copilot behavior guidelines
-- `kiro-documentation-standards.md` - Documentation formatting standards
+### Kiro Steering Docs (`.kiro/steering/`)
 
-## How It Works
+These are synced to every BridgeFirst repo via `sync-steering.sh`. Edit here, then run the sync — never edit the copies in individual repos directly.
 
-When these files are updated and pushed to `main`, a GitHub Action automatically:
-1. Detects the changes
-2. Creates PRs in all my repositories
-3. Updates the `.github/` directory in each repo
+| File | Purpose | Inclusion |
+|---|---|---|
+| `browser-devtools.md` | Chrome DevTools vs Playwright MCP — which to use when | always |
+| `cli-tools-inventory.md` | Available CLI tools, versions, paths, and usage patterns | always |
+| `documentation.md` | Where to put docs (`docs/` folder structure) | always |
+| `pr-review.md` | PR review workflow and comment structure | manual |
 
-## Updating Standards
+### GitHub Copilot Standards (`.github/`)
 
-1. Edit the files in this repository
-2. Commit and push to `main`
-3. GitHub Actions will sync to all repos automatically
+| File | Purpose |
+|---|---|
+| `copilot-instructions.md` | GitHub Copilot behavior guidelines |
+| `kiro-documentation-standards.md` | Documentation formatting standards |
 
-## Manual Sync
+---
 
-To manually trigger a sync:
+## Syncing Steering Docs
+
+Run this whenever you update a shared steering doc:
 
 ```bash
-gh workflow run sync-standards.yml
+cd github-standards
+./sync-steering.sh          # sync all repos + ~/.kiro/steering
+./sync-steering.sh --dry-run  # preview what would change
+./sync-steering.sh --commit   # sync + auto-commit in each repo
 ```
 
-## Adding New Repositories
+The script syncs the 4 shared files to:
+- `bridgefirst-forecasting-api-v2`
+- `bridgefirst-aws-monitoring-dashboard`
+- `bridgefirst-forecasting-terraform`
+- `bridgefirst-forecasting`
+- `bridgefirst-forecasting/bridgefirst-forecasting`
+- `~/.kiro/steering` (local sessions)
 
-New repositories automatically receive these standards when the sync workflow runs.
+> **Note:** Some repos have `.kiro/` in their `.gitignore` (currently `bridgefirst-forecasting-api-v2` and `bridgefirst-forecasting-terraform`). Steering files still work locally in those repos but won't be committed to GitHub — Kiro web won't pick them up there. If you need Kiro web support in those repos, remove `.kiro/` from their `.gitignore`.
 
-## Source of Truth
+---
 
-This repository is the source of truth for all my GitHub repositories.
+## What Stays Repo-Specific
 
-## Local Copy
+These steering docs are owned by each individual repo and are **never overwritten by the sync**:
 
-These files are also maintained in `~/.kiro/` for Kiro AI assistant to use globally.
+- `git.md` — push/merge policy + repo-specific destructive change flags
+- `tech.md` — tech stack details
+- `structure.md` — project structure
+- `product.md` — product overview
+- `terraform.md` — Terraform-specific rules (terraform repo only)
+- `ux-patterns.md`, `debug-tools.md`, `backlog.md`, `deployment-infrastructure.md` (frontend repo)
 
-## Test Update
+---
 
-Testing auto-sync functionality - this line will trigger the workflow.
+## Adding a New Shared Steering Doc
+
+1. Create the file in `.kiro/steering/` here
+2. Add it to the `SHARED_FILES` array in `sync-steering.sh`
+3. Run `./sync-steering.sh`
+4. Commit and push here, then commit in each repo that tracks `.kiro/`
+
+## Adding a New Repo to the Sync
+
+Add the repo path (relative to `~/Documents/alex/bridgeFirst/`) to the `REPOS` array in `sync-steering.sh`.
